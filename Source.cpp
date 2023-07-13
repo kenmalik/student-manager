@@ -168,18 +168,6 @@ void showAllCourseData(Course course) {
 }
 
 void threeCourseStudents(Course courseArr[], int arrLen) {
-	// Selection sort course array by ascending enrollment count
-	int i, j, minIdx;
-	for (i = 0; i < arrLen - 1; i++) {
-		minIdx = i;
-		for (j = i + 1; j < arrLen; j++) {
-			if (courseArr[j].enrollment < courseArr[minIdx].enrollment)
-				minIdx = j;
-		}
-		if (minIdx != i)
-			swap(courseArr[minIdx], courseArr[i]);
-	}
-
 	// Count amount of students that are in every course
 	int count = 0;
 	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
