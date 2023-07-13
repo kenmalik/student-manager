@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <vector>
 #include "student.h"
 using namespace std;
 
@@ -30,7 +31,8 @@ void threeCourseStudents(Course[], int);
 bool studentIsIn(Course, int);
 void showCourseScores(Course[], int, int);
 
-void twoCourseStudents(); // TODO
+void twoCourseStudents(Course[], int); // TODO
+void studentIsInTwoExclusively(Course[], int, int, int);
 
 void topThrees(); // TODO
 
@@ -66,7 +68,7 @@ int main() {
 			threeCourseStudents(courses, fileCount);
 			break;
 		case 3:
-			twoCourseStudents();
+			twoCourseStudents(courses, fileCount);
 			break;
 		case 4:
 			topThrees();
@@ -199,9 +201,39 @@ void showCourseScores(Course courseArr[], int arrLen, int studId) {
 				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].getScore() << ")";
 }
 
-void twoCourseStudents() {
-	cout << "Two Course Menu" << endl;
+void twoCourseStudents(Course courseArr[], int arrLen) {
+	// Check student rosters of each combination of classes
+	int i, j;
+	for (i = 0; i < arrLen; i++) {
+		for (j = i + 1; j < arrLen; j++) {
+			cout << courseArr[i].name << " and " << courseArr[j].name << endl;
+			studentIsInTwoExclusively(courseArr, arrLen, i, j);
+		}
+	}
 }
+
+void studentIsInTwoExclusively(Course courseArr[], int arrLen, int courseIdx1, int courseIdx2) {
+	vector<Student> students;
+	
+	for (int i = 0; i < courseArr[courseIdx1].enrollment; i++) { // Iterate courseArr[courseIdx1] roster
+		if (studentIsIn(courseArr[courseIdx2], courseArr[courseIdx1].studArr[i].getId())) {
+			for (int j = 0; j < arrLen; j++) {
+				if (j != courseIdx1 && j != courseIdx2 && !studentIsIn(courseArr[j], courseArr[courseIdx1].studArr[i].getId())) {
+					students.push_back(courseArr[courseIdx1].studArr[i]);
+				}
+			}
+		}
+	}
+
+	// Output students
+	for (int i = 0; i < students.size(); i++) {
+		cout << setw(7) << students[i].getId()
+			<< setw(10) << students[i].getName();
+		showCourseScores(courseArr, arrLen, students[i].getId());
+		cout << endl;
+	}
+}
+
 void topThrees() {
 	cout << "Top Three Menu" << endl;
 }
