@@ -6,14 +6,8 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include "student.h"
 using namespace std;
-
-class Student {
-public:
-	int id;
-	string name;
-	int score;
-};
 
 struct Course {
 	string name;
@@ -32,7 +26,7 @@ int mainMenu();
 void courseLists(Course[], int);
 void showAllCourseData(Course);
 
-void threeCourseStudents(Course[], int); // TODO
+void threeCourseStudents(Course[], int);
 bool studentIsIn(Course, int);
 void showCourseScores(Course[], int, int);
 
@@ -122,16 +116,20 @@ void loadCourseData(ifstream* ifs, Course courseArr[]) {
 	else
 		activeCourse = &courseArr[2];
 
-	// Begin filling data structure
+	// Fill data structure
 	(*activeCourse).name = courseNameTemp;
 	(*ifs) >> (*activeCourse).enrollment;
 
 	(*activeCourse).studArr = new Student[(*activeCourse).enrollment]; // Create dynamic array of students
 
-	for (int i = 0; i < (*activeCourse).enrollment; i++) // Fill student dynamic arrays with data
-		(*ifs) >> (*activeCourse).studArr[i].id 
-		       >> (*activeCourse).studArr[i].name 
-		       >> (*activeCourse).studArr[i].score;
+	int idTemp, scoreTemp;
+	string nameTemp;
+	for (int i = 0; i < (*activeCourse).enrollment; i++) { // Fill student dynamic arrays with data
+		(*ifs) >> idTemp >> nameTemp >> scoreTemp;
+		(*activeCourse).studArr[i].setId(idTemp);
+		(*activeCourse).studArr[i].setName(nameTemp);
+		(*activeCourse).studArr[i].setScore(scoreTemp);
+	}
 
 	(*ifs).close();
 }
@@ -159,9 +157,9 @@ void showAllCourseData(Course course) {
 		 << "---------------------------------" << endl;
 
 	for (int i = 0; i < course.enrollment; i++) {
-		cout << setw(10) << course.studArr[i].id
-			 << setw(15) << course.studArr[i].name
-			 << setw(5) << course.studArr[i].score << endl;
+		cout << setw(10) << course.studArr[i].getId()
+			 << setw(15) << course.studArr[i].getName()
+			 << setw(5) << course.studArr[i].getScore() << endl;
 	}
 
 	cout << "\n=================================" << endl;
@@ -170,37 +168,35 @@ void showAllCourseData(Course course) {
 void threeCourseStudents(Course courseArr[], int arrLen) {
 	// Count amount of students that are in every course
 	int count = 0;
-	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
-		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id))
+	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the first course appear the other courses
+		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].getId()) && studentIsIn(courseArr[2], courseArr[0].studArr[i].getId()))
 			count++;
 	cout << "  There are " << count << " students who take all " << arrLen << " courses" << endl
 		 << "-----------------------------------------------" << endl;
 
-	// Display data of students in every course
-	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
-		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id)) {
-			cout << setw(7) << courseArr[0].studArr[i].id
-				<< setw(10) << courseArr[0].studArr[i].name;
-			showCourseScores(courseArr, arrLen, courseArr[0].studArr[i].id);
+	// Display data of students that are in every course
+	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the first course appear the other courses
+		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].getId()) && studentIsIn(courseArr[2], courseArr[0].studArr[i].getId())) {
+			cout << setw(7) << courseArr[0].studArr[i].getId()
+				<< setw(10) << courseArr[0].studArr[i].getName();
+			showCourseScores(courseArr, arrLen, courseArr[0].studArr[i].getId());
 			cout << endl;
 		}
 }
 
 bool studentIsIn(Course course, int searchId) {
 	for (int i = 0; i < course.enrollment; i++) // Check if there is an id match in given course
-		if (course.studArr[i].id == searchId)
+		if (course.studArr[i].getId() == searchId)
 			return 1;
 	return 0;
 }
 
 void showCourseScores(Course courseArr[], int arrLen, int studId) {
 	int i, j;
-	for (i = 0; i < arrLen; i++) { // Loop through every course
-		for (j = 0; j < courseArr[i].enrollment; j++) { // Check if id match in the course roster
-			if (courseArr[i].studArr[j].id == studId) // Display score in course if id matches
-				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].score << ")";
-		}
-	}
+	for (i = 0; i < arrLen; i++) // Loop through every course
+		for (j = 0; j < courseArr[i].enrollment; j++) // Check if id match in the course roster
+			if (courseArr[i].studArr[j].getId() == studId) // Display score in course if id matches
+				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].getScore() << ")";
 }
 
 void twoCourseStudents() {
