@@ -22,18 +22,19 @@ struct Course {
 };
 
 // Data processing functions
-void readData(string**, Course*, Course*, Course*);
+void readData(string[], Course[]);
 void openIfs(ifstream*, string);
-void loadCourseData(ifstream*, Course*, Course*, Course*);
+void loadCourseData(ifstream*, Course[]);
 
 // Menu functions
 int mainMenu();
 
-void courseLists(Course&, Course&, Course&);
+void courseLists(Course[], int);
 void showAllCourseData(Course);
 
-void threeCourseStudents(Course, Course, Course); // TODO
+void threeCourseStudents(Course[], int); // TODO
 bool studentIsIn(Course, int);
+void showCourseScores(Course[], int, int);
 
 void twoCourseStudents(); // TODO
 
@@ -42,7 +43,7 @@ void topThrees(); // TODO
 int main() {
 	int fileCount;
 	string* files;
-	Course cpp, java, python;
+	Course* courses;
 
 	// Get filename input
 	cout << "Enter the number of courses : ";
@@ -51,6 +52,7 @@ int main() {
 		cout << "Can only handle 3 files";
 		exit(1);
 	}
+	courses = new Course[fileCount];
 
 	files = new string[fileCount];                      // Create dynamic array to store filenames
 	for (int i = 0; i < fileCount; i++) {               // Store user filename input into array
@@ -58,17 +60,16 @@ int main() {
 		cin >> files[i];
 	}
 
-	// TODO: Handle files inputted in different order
-	readData(&files, &cpp, &java, &python); // Read file data and put into data structure
-	delete[] files;                      // Delete filename array to save space in heap
+	readData(files, courses); // Read file data and put into data structure
+	delete[] files;           // Delete filename array to save space in heap
 
 	while (1) { // Menu loop
 		switch (mainMenu()) {
 		case 1:
-			courseLists(cpp, java, python);
+			courseLists(courses, fileCount);
 			break;
 		case 2:
-			threeCourseStudents();
+			threeCourseStudents(courses, fileCount);
 			break;
 		case 3:
 			twoCourseStudents();
@@ -86,18 +87,18 @@ int main() {
 	return 0;
 }
 
-void readData(string** fileArrPtr, Course* cppCourse, Course* javaCourse, Course* pythonCourse) {
+void readData(string fileArr[], Course courseArr[]) {
 	ifstream ifs1, ifs2, ifs3;
 
 	// Open files
-	openIfs(&ifs1, (*fileArrPtr)[0]);
-	openIfs(&ifs2, (*fileArrPtr)[1]);
-	openIfs(&ifs3, (*fileArrPtr)[2]);
+	openIfs(&ifs1, fileArr[0]);
+	openIfs(&ifs2, fileArr[1]);
+	openIfs(&ifs3, fileArr[2]);
 
 	// Put file data into data structure
-	loadCourseData(&ifs1, cppCourse, javaCourse, pythonCourse);
-	loadCourseData(&ifs2, cppCourse, javaCourse, pythonCourse);
-	loadCourseData(&ifs3, cppCourse, javaCourse, pythonCourse);
+	loadCourseData(&ifs1, courseArr);
+	loadCourseData(&ifs2, courseArr);
+	loadCourseData(&ifs3, courseArr);
 }
 
 void openIfs(ifstream* ifs, string fileName) {
@@ -108,18 +109,18 @@ void openIfs(ifstream* ifs, string fileName) {
 	}
 }
 
-void loadCourseData(ifstream* ifs, Course* cppCourse, Course* javaCourse, Course* pythonCourse) {
+void loadCourseData(ifstream* ifs, Course courseArr[]) {
 	string courseNameTemp;
 	Course* activeCourse;
 
 	// Determine which course struct to load to
 	(*ifs) >> courseNameTemp;
 	if (courseNameTemp == "C++")
-		activeCourse = cppCourse;
+		activeCourse = &courseArr[0];
 	else if (courseNameTemp == "Java")
-		activeCourse = javaCourse;
+		activeCourse = &courseArr[1];
 	else
-		activeCourse = pythonCourse;
+		activeCourse = &courseArr[2];
 
 	// Begin filling data structure
 	(*activeCourse).name = courseNameTemp;
@@ -148,10 +149,9 @@ int mainMenu() {
 	return selection;
 }
 
-void courseLists(Course& course1, Course& course2, Course& course3) {
-	showAllCourseData(course1);
-	showAllCourseData(course2);
-	showAllCourseData(course3);
+void courseLists(Course courseArr[], int arrLen) {
+	for (int i = 0; i < arrLen; i++)
+		showAllCourseData(courseArr[i]);
 }
 
 void showAllCourseData(Course course) {
@@ -167,14 +167,40 @@ void showAllCourseData(Course course) {
 	cout << "\n=================================" << endl;
 }
 
-void threeCourseStudents(Course cppCourse, Course javaCourse, Course pythonCourse) {
+void threeCourseStudents(Course courseArr[], int arrLen) {
+	// Count amount of students that are in every course
+	int count = 0;
+	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
+		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id))
+			count++;
+	cout << "  There are " << count << " students who take all " << arrLen << " courses" << endl
+		 << "-----------------------------------------------" << endl;
 
-
-	cout << "All Course Menu" << endl;
+	// Display data of students in every course
+	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
+		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id)) {
+			cout << setw(7) << courseArr[0].studArr[i].id
+				<< setw(10) << courseArr[0].studArr[i].name;
+			showCourseScores(courseArr, arrLen, courseArr[0].studArr[i].id);
+			cout << endl;
+		}
 }
 
-bool studentIsIn(Course course, int id) {
+bool studentIsIn(Course course, int searchId) {
+	for (int i = 0; i < course.enrollment; i++) // Check if there is an id match in given course
+		if (course.studArr[i].id == searchId)
+			return 1;
+	return 0;
+}
 
+void showCourseScores(Course courseArr[], int arrLen, int studId) {
+	int i, j;
+	for (i = 0; i < arrLen; i++) { // Loop through every course
+		for (j = 0; j < courseArr[i].enrollment; j++) { // Check if id match in the course roster
+			if (courseArr[i].studArr[j].id == studId) // Display score in course if id matches
+				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].score << ")";
+		}
+	}
 }
 
 void twoCourseStudents() {
