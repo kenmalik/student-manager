@@ -32,7 +32,7 @@ bool studentIsIn(Course, int);
 void showCourseScores(Course[], int, int);
 
 void twoCourseStudents(Course[], int); // TODO
-void studentIsInTwoExclusively(Course[], int, int, int);
+void showExclusiveMatches(Course[], int, int, int);
 
 void topThrees(); // TODO
 
@@ -202,35 +202,30 @@ void showCourseScores(Course courseArr[], int arrLen, int studId) {
 }
 
 void twoCourseStudents(Course courseArr[], int arrLen) {
-	// Check student rosters of each combination of classes
-	int i, j;
-	for (i = 0; i < arrLen; i++) {
-		for (j = i + 1; j < arrLen; j++) {
-			cout << courseArr[i].name << " and " << courseArr[j].name << endl;
-			studentIsInTwoExclusively(courseArr, arrLen, i, j);
+	int course1, course2;
+	for (course1 = 0; course1 < arrLen; course1++) { // For loops iterate through every combination of courses
+		for (course2 = course1 + 1; course2 < arrLen; course2++) {
+			cout << courseArr[course1].name << " and " << courseArr[course2].name << endl;
+			showExclusiveMatches(courseArr, arrLen, course1, course2);
 		}
 	}
 }
 
-void studentIsInTwoExclusively(Course courseArr[], int arrLen, int courseIdx1, int courseIdx2) {
-	vector<Student> students;
-	
-	for (int i = 0; i < courseArr[courseIdx1].enrollment; i++) { // Iterate courseArr[courseIdx1] roster
+void showExclusiveMatches(Course courseArr[], int arrLen, int courseIdx1, int courseIdx2) {
+	// Display data of students that are in two courses
+	for (int i = 0; i < courseArr[courseIdx1].enrollment; i++) { // Check whether the students in the first course appear the other courses
 		if (studentIsIn(courseArr[courseIdx2], courseArr[courseIdx1].studArr[i].getId())) {
-			for (int j = 0; j < arrLen; j++) {
-				if (j != courseIdx1 && j != courseIdx2 && !studentIsIn(courseArr[j], courseArr[courseIdx1].studArr[i].getId())) {
-					students.push_back(courseArr[courseIdx1].studArr[i]);
-				}
+			bool flag = 0;
+			for (int j = 0; j < arrLen; j++) // Search other course rosters for student
+				if (j != courseIdx1 && j != courseIdx2 && studentIsIn(courseArr[j], courseArr[courseIdx1].studArr[i].getId()))
+					flag = 1;
+			if (flag == 0) {
+				cout << setw(7) << courseArr[courseIdx1].studArr[i].getId()
+					<< setw(10) << courseArr[courseIdx1].studArr[i].getName();
+				showCourseScores(courseArr, arrLen, courseArr[courseIdx1].studArr[i].getId());
+				cout << endl;
 			}
 		}
-	}
-
-	// Output students
-	for (int i = 0; i < students.size(); i++) {
-		cout << setw(7) << students[i].getId()
-			<< setw(10) << students[i].getName();
-		showCourseScores(courseArr, arrLen, students[i].getId());
-		cout << endl;
 	}
 }
 
