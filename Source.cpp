@@ -32,8 +32,9 @@ int mainMenu();
 void courseLists(Course[], int);
 void showAllCourseData(Course);
 
-void threeCourseStudents(Course, Course, Course); // TODO
+void threeCourseStudents(Course[], int); // TODO
 bool studentIsIn(Course, int);
+void showCourseScores(Course[], int, int);
 
 void twoCourseStudents(); // TODO
 
@@ -60,7 +61,7 @@ int main() {
 	}
 
 	readData(files, courses); // Read file data and put into data structure
-	delete[] files;                      // Delete filename array to save space in heap
+	delete[] files;           // Delete filename array to save space in heap
 
 	while (1) { // Menu loop
 		switch (mainMenu()) {
@@ -68,7 +69,7 @@ int main() {
 			courseLists(courses, fileCount);
 			break;
 		case 2:
-			//threeCourseStudents();
+			threeCourseStudents(courses, fileCount);
 			break;
 		case 3:
 			twoCourseStudents();
@@ -166,14 +167,52 @@ void showAllCourseData(Course course) {
 	cout << "\n=================================" << endl;
 }
 
-void threeCourseStudents(Course cppCourse, Course javaCourse, Course pythonCourse) {
+void threeCourseStudents(Course courseArr[], int arrLen) {
+	// Selection sort course array by ascending enrollment count
+	int i, j, minIdx;
+	for (i = 0; i < arrLen - 1; i++) {
+		minIdx = i;
+		for (j = i + 1; j < arrLen; j++) {
+			if (courseArr[j].enrollment < courseArr[minIdx].enrollment)
+				minIdx = j;
+		}
+		if (minIdx != i)
+			swap(courseArr[minIdx], courseArr[i]);
+	}
 
+	// Count amount of students that are in every course
+	int count = 0;
+	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
+		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id))
+			count++;
+	cout << "  There are " << count << " students who take all " << arrLen << " courses" << endl
+		 << "-----------------------------------------------" << endl;
 
-	cout << "All Course Menu" << endl;
+	// Display data of students in every course
+	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
+		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id)) {
+			cout << setw(7) << courseArr[0].studArr[i].id
+				<< setw(10) << courseArr[0].studArr[i].name;
+			showCourseScores(courseArr, arrLen, courseArr[0].studArr[i].id);
+			cout << endl;
+		}
 }
 
-bool studentIsIn(Course course, int id) {
+bool studentIsIn(Course course, int searchId) {
+	for (int i = 0; i < course.enrollment; i++) // Check if there is an id match in given course
+		if (course.studArr[i].id == searchId)
+			return 1;
 	return 0;
+}
+
+void showCourseScores(Course courseArr[], int arrLen, int studId) {
+	int i, j;
+	for (i = 0; i < arrLen; i++) { // Loop through every course
+		for (j = 0; j < courseArr[i].enrollment; j++) { // Check if id match in the course roster
+			if (courseArr[i].studArr[j].id == studId) // Display score in course if id matches
+				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].score << ")";
+		}
+	}
 }
 
 void twoCourseStudents() {
