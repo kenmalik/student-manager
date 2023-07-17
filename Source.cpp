@@ -24,17 +24,17 @@ void loadCourseData(ifstream*, Course[]);
 // Menu functions
 int mainMenu();
 
-void courseLists(Course[], int);
+void courseLists(Course[], const int&);
 void showAllCourseData(Course);
 
-void threeCourseStudents(Course[], int);
+void threeCourseStudents(Course[], const int&);
 bool studentIsIn(Course, int);
-void showCourseScores(Course[], int, int);
+void showCourseScores(Course[], const int&, int);
 
-void twoCourseStudents(Course[], int);
-void showExclusiveMatches(Course[], int, int, int);
+void twoCourseStudents(Course[], const int&);
+void showExclusiveMatches(Course[], const int&, int, int);
 
-void topThrees(Course[], int); // TODO
+void topThrees(Course[], const int&); // TODO
 
 int main() {
 	int fileCount;
@@ -149,7 +149,7 @@ int mainMenu() {
 	return selection;
 }
 
-void courseLists(Course courseArr[], int arrLen) {
+void courseLists(Course courseArr[], const int& arrLen) {
 	for (int i = 0; i < arrLen; i++)
 		showAllCourseData(courseArr[i]);
 }
@@ -167,7 +167,7 @@ void showAllCourseData(Course course) {
 	cout << "\n=================================" << endl;
 }
 
-void threeCourseStudents(Course courseArr[], int arrLen) {
+void threeCourseStudents(Course courseArr[], const int& arrLen) {
 	// Count amount of students that are in every course
 	int count = 0;
 	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the first course appear the other courses
@@ -193,7 +193,7 @@ bool studentIsIn(Course course, int searchId) {
 	return 0;
 }
 
-void showCourseScores(Course courseArr[], int arrLen, int studId) {
+void showCourseScores(Course courseArr[], const int& arrLen, int studId) {
 	int i, j;
 	for (i = 0; i < arrLen; i++) // Loop through every course
 		for (j = 0; j < courseArr[i].enrollment; j++) // Check if id match in the course roster
@@ -201,7 +201,7 @@ void showCourseScores(Course courseArr[], int arrLen, int studId) {
 				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].getScore() << ")";
 }
 
-void twoCourseStudents(Course courseArr[], int arrLen) {
+void twoCourseStudents(Course courseArr[], const int& arrLen) {
 	int courseIdx1, courseIdx2;
 	for (courseIdx1 = 0; courseIdx1 < arrLen; courseIdx1++) { // For loops iterate through each combination of classes
 		for (courseIdx2 = courseIdx1 + 1; courseIdx2 < arrLen; courseIdx2++) {
@@ -210,7 +210,7 @@ void twoCourseStudents(Course courseArr[], int arrLen) {
 	}
 }
 
-void showExclusiveMatches(Course courseArr[], int arrLen, int courseIdx1, int courseIdx2) {
+void showExclusiveMatches(Course courseArr[], const int& arrLen, int courseIdx1, int courseIdx2) {
 	vector<Student> students;
 	
 	for (int i = 0; i < courseArr[courseIdx1].enrollment; i++) { // Iterate courseArr[courseIdx1] roster
@@ -234,7 +234,7 @@ void showExclusiveMatches(Course courseArr[], int arrLen, int courseIdx1, int co
 	}
 }
 
-void topThrees(Course courseArr[], int arrLen) {
+void topThrees(Course courseArr[], const int& arrLen) {
 	for (int courseIdx = 0; courseIdx < arrLen; courseIdx++) {
 		cout << "[ " << courseArr[courseIdx].name << " Top Three Scores ]" << endl;
 
@@ -242,10 +242,9 @@ void topThrees(Course courseArr[], int arrLen) {
 		int i, j, maxIdx;
 		for (i = 0; i < courseArr[courseIdx].enrollment - 1; i++) {
 			maxIdx = i;
-			for (j = i + 1; j < courseArr[courseIdx].enrollment; j++) {
+			for (j = i + 1; j < courseArr[courseIdx].enrollment; j++)
 				if (courseArr[courseIdx].studArr[j].getScore() > courseArr[courseIdx].studArr[maxIdx].getScore())
 					maxIdx = j;
-			}
 			if (maxIdx != i)
 				swap(courseArr[courseIdx].studArr[maxIdx], courseArr[courseIdx].studArr[i]);
 		}
