@@ -156,6 +156,7 @@ void allCourseStudents(Course courseArr[], const int& arrLen) {
 		for (courseIdx = 1; courseIdx < arrLen; courseIdx++) { // Iterate through other courses. If student does not appear in one, they are not added to vector
 			if (!studentIsIn(courseArr[courseIdx], courseArr[0].studArr[studIdx].getId())) {
 				inAll = 0;
+				cout << courseArr[0].studArr[studIdx].getName() << " is not in " << courseArr[courseIdx].name << endl;
 				break;
 			}
 		}
