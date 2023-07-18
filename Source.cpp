@@ -27,7 +27,7 @@ int mainMenu();
 void courseLists(Course[], const int&);
 void showAllCourseData(Course);
 
-void threeCourseStudents(Course[], const int&);
+void allCourseStudents(Course[], const int&);
 bool studentIsIn(Course, int);
 void showCourseScores(Course[], const int&, int);
 
@@ -61,7 +61,7 @@ int main() {
 			courseLists(courses, fileCount);
 			break;
 		case 2:
-			threeCourseStudents(courses, fileCount);
+			allCourseStudents(courses, fileCount);
 			break;
 		case 3:
 			twoCourseStudents(courses, fileCount);
@@ -147,7 +147,7 @@ void showAllCourseData(Course course) {
 	cout << "\n=================================" << endl;
 }
 
-void threeCourseStudents(Course courseArr[], const int& arrLen) {
+void allCourseStudents(Course courseArr[], const int& arrLen) {
 	vector<Student> studentsInAllClasses;
 
 	int studIdx, courseIdx;
