@@ -132,7 +132,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cpp.txt" />
+    <Text Include="html.txt" />
     <Text Include="java.txt" />
+    <Text Include="javascript.txt" />
     <Text Include="python.txt" />
   </ItemGroup>
   <ItemGroup>
