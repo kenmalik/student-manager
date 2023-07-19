@@ -10,9 +10,9 @@
 using namespace std;
 
 struct Course {
-	string name;
-	int enrollment;
-	Student* studArr;
+	string name = "";
+	int enrollment = 0;
+	Student* studArr = nullptr;
 };
 
 
@@ -200,7 +200,7 @@ void allCourseStudents(Course courseArr[], const size_t& arrLen) {
 
 		if (inAll) { // Add student to array if in all classes
 			studentsInAllClasses[matchListIdx] = courseArr[0].studArr[studIdx];
-			if (++matchListIdx == matchListSize)
+			if (++matchListIdx == matchListSize) // Increase size of array at full capacity
 				studentsInAllClasses = growArray(studentsInAllClasses, matchListSize);
 		}
 	}
@@ -209,7 +209,7 @@ void allCourseStudents(Course courseArr[], const size_t& arrLen) {
 		 << "-----------------------------------------------" << endl;
 
 	// Display data of students that are in every course
-	for (int i = 0; i < matchListIdx; i++) { // Check whether the students in the first course appear the other courses
+	for (int i = 0; i < matchListIdx; i++) {
 		cout << setw(7) << studentsInAllClasses[i].getId()
 			<< setw(10) << studentsInAllClasses[i].getName();
 		showCourseScores(courseArr, arrLen, studentsInAllClasses[i].getId());
@@ -222,18 +222,12 @@ void allCourseStudents(Course courseArr[], const size_t& arrLen) {
 
 Student* growArray(Student arr[], size_t& size) {
 	size *= 2;
-	Student* tempArr = new Student[size];
+	Student* tempArr = new Student[size]; // Temporary array of double size
 
-	for (int i = 0; i < size / 2; i++)
+	for (int i = 0; i < size / 2; i++) // Copy data from original array into temp array
 		tempArr[i] = arr[i];
-	delete[] arr;
-
-	arr = new Student[size];
-	for (int i = 0; i < size; i++)
-		arr[i] = tempArr[i];
-	delete[] tempArr;
-
-	return arr;
+	
+	return tempArr;
 }
 
 bool studentIsIn(Course course, int searchId) {

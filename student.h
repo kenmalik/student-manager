@@ -10,13 +10,16 @@ private:
 	string name;
 	int score;
 public:
+	// Constructors
 	Student();
 	Student(int idNum, string studName, int courseScore);
 
+	// Setters
 	void setId(int idNum);
 	void setName(string studName);
 	void setScore(int courseScore);
 
+	// Getters
 	int getId();
 	string getName();
 	int getScore();
