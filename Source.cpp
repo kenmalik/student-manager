@@ -15,6 +15,7 @@ struct Course {
 	Student* studArr;
 };
 
+
 // Data processing functions
 void readData(string[], Course[], const size_t&);
 // Precondition:  Array of filename strings, array to be filled with course data, and size of
@@ -31,6 +32,7 @@ void loadCourseData(ifstream*, Course&);
 //                struct to be loaded into inputted.
 // Postcondition: Data loaded into Course structs. Dynamic arrays associated with these structs
 //                created to store Student objects.
+
 
 // Menu functions
 int mainMenu();
@@ -72,6 +74,7 @@ void topThrees(Course[], const size_t&);
 // Precondition:  Array of courses and size of the array inputted.
 // Postcondition: Selection sorts students by descending score for each class. Outputs id and name for each
 //                student who earned the top three scores in the class. Students are grouped by score.
+
 
 int main() {
 	int fileCount;
@@ -188,14 +191,14 @@ void allCourseStudents(Course courseArr[], const size_t& arrLen) {
 	int studIdx, courseIdx, matchListIdx = 0;
 	for (studIdx = 0; studIdx < courseArr[0].enrollment; studIdx++) { // Iterate through each student in the first course
 		bool inAll = 1;
-		for (courseIdx = 1; courseIdx < arrLen; courseIdx++) { // Iterate through other courses. If student does not appear in one, they are not added to vector
+		for (courseIdx = 1; courseIdx < arrLen; courseIdx++) { // Iterate through other courses. If student does not appear in one, they are not added to array
 			if (!studentIsIn(courseArr[courseIdx], courseArr[0].studArr[studIdx].getId())) {
 				inAll = 0;
 				break;
 			}
 		}
 
-		if (inAll) {
+		if (inAll) { // Add student to array if in all classes
 			studentsInAllClasses[matchListIdx] = courseArr[0].studArr[studIdx];
 			if (++matchListIdx == matchListSize)
 				studentsInAllClasses = growArray(studentsInAllClasses, matchListSize);
@@ -212,6 +215,8 @@ void allCourseStudents(Course courseArr[], const size_t& arrLen) {
 		showCourseScores(courseArr, arrLen, studentsInAllClasses[i].getId());
 		cout << endl;
 	}
+
+	delete[] studentsInAllClasses;
 }
 
 
@@ -260,14 +265,14 @@ void showExclusiveMatches(Course courseArr[], const size_t& arrLen, int courseId
 	
 	for (int i = 0; i < courseArr[courseIdx1].enrollment; i++) { // Iterate courseArr[courseIdx1] roster
 		if (studentIsIn(courseArr[courseIdx2], courseArr[courseIdx1].studArr[i].getId())) {
-			bool otherMatch = 0;
+			bool inOtherCourse = 0;
 			for (int j = 0; j < arrLen; j++) { // Iterate through other courses to check if student is appears anywhere else
 				if (j != courseIdx1 && j != courseIdx2 && studentIsIn(courseArr[j], courseArr[courseIdx1].studArr[i].getId())) {
-					otherMatch = 1;
+					inOtherCourse = 1;
 					break;
 				}
 			}
-			if (otherMatch == 0) {
+			if (!inOtherCourse) {
 				studentsInTwo[matchListIdx] = courseArr[courseIdx1].studArr[i];
 				if (++matchListIdx == matchListSize)
 					growArray(studentsInTwo, matchListSize);
@@ -284,6 +289,8 @@ void showExclusiveMatches(Course courseArr[], const size_t& arrLen, int courseId
 		showCourseScores(courseArr, arrLen, studentsInTwo[i].getId());
 		cout << endl;
 	}
+
+	delete[] studentsInTwo;
 }
 
 void topThrees(Course courseArr[], const size_t& arrLen) {
