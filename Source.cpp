@@ -6,14 +6,8 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include "student.h"
 using namespace std;
-
-class Student {
-public:
-	int id;
-	string name;
-	int score;
-};
 
 struct Course {
 	string name;
@@ -22,23 +16,62 @@ struct Course {
 };
 
 // Data processing functions
-void readData(string[], Course[]);
+void readData(string[], Course[], const size_t&);
+// Precondition:  Array of filename strings, array to be filled with course data, and size of
+//                these arrays inputted. Calls openIfs() and loadCourseData().
+// Postcondition: Data structure of courses filled using files specified.
+
 void openIfs(ifstream*, string);
-void loadCourseData(ifstream*, Course[]);
+// Precondition:  Pointer to dynamic array of ifstreams created in readData() and name of file to
+//                be read is inputted.
+// Postcondition: Ifstream for specified file created.
+
+void loadCourseData(ifstream*, Course&);
+// Precondition:  Ifstream for data to be loaded into data structure and memory address for Course
+//                struct to be loaded into inputted.
+// Postcondition: Data loaded into Course structs. Dynamic arrays associated with these structs
+//                created to store Student objects.
 
 // Menu functions
 int mainMenu();
+// Precondition:  Called by control loop switch statement in main().
+// Postcondition: Takes input from user and returns selected menu index.
 
-void courseLists(Course[], int);
-void showAllCourseData(Course);
+void courseLists(Course[], const size_t&);
+// Precondition:  Array of Course structs and size of the array inputted.
+// Postcondition: Displays course's names and information of all students in said course.
 
-void threeCourseStudents(Course[], int); // TODO
+void allCourseStudents(Course[], const size_t&);
+// Precondition:  Array of Course structs and size of the array inputted.
+// Postcondition: Displays name and course score data for students who take every class.
+
+Student* growArray(Student[], size_t&);
+// Precondition:  Dynamic array to increase size of and the current size of said array inputted.
+// Postcondition: Creates new dynamic array of double the size, loads original array's data into it, and
+//                returns pointer to new dynamic array.
+
 bool studentIsIn(Course, int);
-void showCourseScores(Course[], int, int);
+// Precondition:  Course struct to search and id number for student to search for inputted.
+// Postcondition: Returns bool indicating whether or not student id is found in course roster.
 
-void twoCourseStudents(); // TODO
+void showCourseScores(Course[], const size_t&, int);
+// Precondition:  Array of courses, size of the array, and id number of student search for inputted.
+// Postcondition: Displays names of courses taken and score student recieved in the course.
 
-void topThrees(); // TODO
+void twoCourseStudents(Course[], const size_t&);
+// Precondition:  Array of courses and size of the array inputted.
+// Postcondition: Calls showExclusiveMatches() for every combination of two courses.
+
+void showExclusiveMatches(Course[], const size_t&, int, int);
+// Precondition:  Array of courses, size of the array, and indices of courses to cross-reference inputted.
+// Postcondition: Displays name of students that are in two classes exclusively, the names of the
+//                courses they take, and the scores they earned in each class. For every combination
+//                of two courses, the number of students who take those courses exclusively is shown.
+
+void topThrees(Course[], const size_t&);
+// Precondition:  Array of courses and size of the array inputted.
+// Postcondition: Selection sorts students by descending score for each class. Outputs id and name for each
+//                student who earned the top three scores in the class. Students are grouped by score.
 
 int main() {
 	int fileCount;
@@ -48,10 +81,6 @@ int main() {
 	// Get filename input
 	cout << "Enter the number of courses : ";
 	cin >> fileCount;
-	if (fileCount != 3) { // Error text if user inputs number other than 3
-		cout << "Can only handle 3 files";
-		exit(1);
-	}
 	courses = new Course[fileCount];
 
 	files = new string[fileCount];                      // Create dynamic array to store filenames
@@ -60,8 +89,8 @@ int main() {
 		cin >> files[i];
 	}
 
-	readData(files, courses); // Read file data and put into data structure
-	delete[] files;           // Delete filename array to save space in heap
+	readData(files, courses, fileCount);   // Read file data and put into data structure
+	delete[] files;                        // Delete filename array to save space in heap
 
 	while (1) { // Menu loop
 		switch (mainMenu()) {
@@ -69,13 +98,13 @@ int main() {
 			courseLists(courses, fileCount);
 			break;
 		case 2:
-			threeCourseStudents(courses, fileCount);
+			allCourseStudents(courses, fileCount);
 			break;
 		case 3:
-			twoCourseStudents();
+			twoCourseStudents(courses, fileCount);
 			break;
 		case 4:
-			topThrees();
+			topThrees(courses, fileCount);
 			break;
 		case 5:
 			exit(0);
@@ -87,18 +116,13 @@ int main() {
 	return 0;
 }
 
-void readData(string fileArr[], Course courseArr[]) {
-	ifstream ifs1, ifs2, ifs3;
+void readData(string fileArr[], Course courseArr[], const size_t& arrLen) {
+	ifstream* ifsArr = new ifstream[arrLen];
 
-	// Open files
-	openIfs(&ifs1, fileArr[0]);
-	openIfs(&ifs2, fileArr[1]);
-	openIfs(&ifs3, fileArr[2]);
-
-	// Put file data into data structure
-	loadCourseData(&ifs1, courseArr);
-	loadCourseData(&ifs2, courseArr);
-	loadCourseData(&ifs3, courseArr);
+	for (int i = 0; i < arrLen; i++) {
+		openIfs(&ifsArr[i], fileArr[i]); // Open file from user input
+		loadCourseData(&ifsArr[i], courseArr[i]); // Fill data structure with data from file
+	}
 }
 
 void openIfs(ifstream* ifs, string fileName) {
@@ -109,29 +133,22 @@ void openIfs(ifstream* ifs, string fileName) {
 	}
 }
 
-void loadCourseData(ifstream* ifs, Course courseArr[]) {
-	string courseNameTemp;
-	Course* activeCourse;
+void loadCourseData(ifstream* ifs, Course& course) {
+	// General course data
+	(*ifs) >> course.name;
+	(*ifs) >> course.enrollment;
 
-	// Determine which course struct to load to
-	(*ifs) >> courseNameTemp;
-	if (courseNameTemp == "C++")
-		activeCourse = &courseArr[0];
-	else if (courseNameTemp == "Java")
-		activeCourse = &courseArr[1];
-	else
-		activeCourse = &courseArr[2];
+	// Student data
+	course.studArr = new Student[course.enrollment]; // Create dynamic array of students
 
-	// Begin filling data structure
-	(*activeCourse).name = courseNameTemp;
-	(*ifs) >> (*activeCourse).enrollment;
-
-	(*activeCourse).studArr = new Student[(*activeCourse).enrollment]; // Create dynamic array of students
-
-	for (int i = 0; i < (*activeCourse).enrollment; i++) // Fill student dynamic arrays with data
-		(*ifs) >> (*activeCourse).studArr[i].id 
-		       >> (*activeCourse).studArr[i].name 
-		       >> (*activeCourse).studArr[i].score;
+	int idTemp, scoreTemp;
+	string nameTemp;
+	for (int i = 0; i < course.enrollment; i++) { // Fill student dynamic arrays with data
+		(*ifs) >> idTemp >> nameTemp >> scoreTemp;
+		course.studArr[i].setId(idTemp);
+		course.studArr[i].setName(nameTemp);
+		course.studArr[i].setScore(scoreTemp);
+	}
 
 	(*ifs).close();
 }
@@ -149,63 +166,149 @@ int mainMenu() {
 	return selection;
 }
 
-void courseLists(Course courseArr[], int arrLen) {
-	for (int i = 0; i < arrLen; i++)
-		showAllCourseData(courseArr[i]);
+void courseLists(Course courseArr[], const size_t& arrLen) {
+	for (int i = 0; i < arrLen; i++) {
+		cout << "\nCourse : " << courseArr[i].name << endl
+			<< "---------------------------------" << endl;
+
+		for (int j = 0; j < courseArr[i].enrollment; j++) {
+			cout << setw(10) << courseArr[i].studArr[j].getId()
+				<< setw(15) << courseArr[i].studArr[j].getName()
+				<< setw(5) << courseArr[i].studArr[j].getScore() << endl;
+		}
+
+		cout << "\n=================================" << endl;
+	}
 }
 
-void showAllCourseData(Course course) {
-	cout << "\nCourse : " << course.name << endl
-		 << "---------------------------------" << endl;
+void allCourseStudents(Course courseArr[], const size_t& arrLen) {
+	size_t matchListSize = courseArr[0].enrollment / 4;
+	Student* studentsInAllClasses = new Student[matchListSize];
 
-	for (int i = 0; i < course.enrollment; i++) {
-		cout << setw(10) << course.studArr[i].id
-			 << setw(15) << course.studArr[i].name
-			 << setw(5) << course.studArr[i].score << endl;
+	int studIdx, courseIdx, matchListIdx = 0;
+	for (studIdx = 0; studIdx < courseArr[0].enrollment; studIdx++) { // Iterate through each student in the first course
+		bool inAll = 1;
+		for (courseIdx = 1; courseIdx < arrLen; courseIdx++) { // Iterate through other courses. If student does not appear in one, they are not added to vector
+			if (!studentIsIn(courseArr[courseIdx], courseArr[0].studArr[studIdx].getId())) {
+				inAll = 0;
+				break;
+			}
+		}
+
+		if (inAll) {
+			studentsInAllClasses[matchListIdx] = courseArr[0].studArr[studIdx];
+			if (++matchListIdx == matchListSize)
+				studentsInAllClasses = growArray(studentsInAllClasses, matchListSize);
+		}
 	}
 
-	cout << "\n=================================" << endl;
-}
-
-void threeCourseStudents(Course courseArr[], int arrLen) {
-	// Count amount of students that are in every course
-	int count = 0;
-	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
-		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id))
-			count++;
-	cout << "  There are " << count << " students who take all " << arrLen << " courses" << endl
+	cout << "\n  There are " << matchListIdx << " students who take all " << arrLen << " courses" << endl
 		 << "-----------------------------------------------" << endl;
 
-	// Display data of students in every course
-	for (int i = 0; i < courseArr[0].enrollment; i++) // Check whether the students in the smallest course appear the other courses
-		if (studentIsIn(courseArr[1], courseArr[0].studArr[i].id) && studentIsIn(courseArr[2], courseArr[0].studArr[i].id)) {
-			cout << setw(7) << courseArr[0].studArr[i].id
-				<< setw(10) << courseArr[0].studArr[i].name;
-			showCourseScores(courseArr, arrLen, courseArr[0].studArr[i].id);
-			cout << endl;
-		}
+	// Display data of students that are in every course
+	for (int i = 0; i < matchListIdx; i++) { // Check whether the students in the first course appear the other courses
+		cout << setw(7) << studentsInAllClasses[i].getId()
+			<< setw(10) << studentsInAllClasses[i].getName();
+		showCourseScores(courseArr, arrLen, studentsInAllClasses[i].getId());
+		cout << endl;
+	}
+}
+
+
+Student* growArray(Student arr[], size_t& size) {
+	size *= 2;
+	Student* tempArr = new Student[size];
+
+	for (int i = 0; i < size / 2; i++)
+		tempArr[i] = arr[i];
+	delete[] arr;
+
+	arr = new Student[size];
+	for (int i = 0; i < size; i++)
+		arr[i] = tempArr[i];
+	delete[] tempArr;
+
+	return arr;
 }
 
 bool studentIsIn(Course course, int searchId) {
 	for (int i = 0; i < course.enrollment; i++) // Check if there is an id match in given course
-		if (course.studArr[i].id == searchId)
+		if (course.studArr[i].getId() == searchId)
 			return 1;
 	return 0;
 }
 
-void showCourseScores(Course courseArr[], int arrLen, int studId) {
+void showCourseScores(Course courseArr[], const size_t& arrLen, int studId) {
 	int i, j;
-	for (i = 0; i < arrLen; i++) { // Loop through every course
-		for (j = 0; j < courseArr[i].enrollment; j++) { // Check if id match in the course roster
-			if (courseArr[i].studArr[j].id == studId) // Display score in course if id matches
-				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].score << ")";
+	for (i = 0; i < arrLen; i++) // Loop through every course
+		for (j = 0; j < courseArr[i].enrollment; j++) // Check if id match in the course roster
+			if (courseArr[i].studArr[j].getId() == studId) // Display score in course if id matches
+				cout << "  " << courseArr[i].name << "(" << courseArr[i].studArr[j].getScore() << ")";
+}
+
+void twoCourseStudents(Course courseArr[], const size_t& arrLen) {
+	int courseIdx1, courseIdx2;
+	for (courseIdx1 = 0; courseIdx1 < arrLen; courseIdx1++) // For loops iterate through each combination of classes
+		for (courseIdx2 = courseIdx1 + 1; courseIdx2 < arrLen; courseIdx2++)
+			showExclusiveMatches(courseArr, arrLen, courseIdx1, courseIdx2);
+}
+
+void showExclusiveMatches(Course courseArr[], const size_t& arrLen, int courseIdx1, int courseIdx2) {
+	size_t matchListSize = courseArr[courseIdx1].enrollment / 4;
+	Student* studentsInTwo = new Student[matchListSize];
+	int matchListIdx = 0;
+	
+	for (int i = 0; i < courseArr[courseIdx1].enrollment; i++) { // Iterate courseArr[courseIdx1] roster
+		if (studentIsIn(courseArr[courseIdx2], courseArr[courseIdx1].studArr[i].getId())) {
+			bool otherMatch = 0;
+			for (int j = 0; j < arrLen; j++) { // Iterate through other courses to check if student is appears anywhere else
+				if (j != courseIdx1 && j != courseIdx2 && studentIsIn(courseArr[j], courseArr[courseIdx1].studArr[i].getId())) {
+					otherMatch = 1;
+					break;
+				}
+			}
+			if (otherMatch == 0) {
+				studentsInTwo[matchListIdx] = courseArr[courseIdx1].studArr[i];
+				if (++matchListIdx == matchListSize)
+					growArray(studentsInTwo, matchListSize);
+			}
 		}
+	}
+
+	// Output list of students in the two specified courses exclusively
+	cout << "\n  There are " << matchListSize << " students that take " << courseArr[courseIdx1].name << " and " << courseArr[courseIdx2].name << endl;
+	cout << "------------------------------------------------" << endl;
+	for (int i = 0; i < matchListIdx; i++) {
+		cout << setw(7) << studentsInTwo[i].getId()
+			 << setw(10) << studentsInTwo[i].getName();
+		showCourseScores(courseArr, arrLen, studentsInTwo[i].getId());
+		cout << endl;
 	}
 }
 
-void twoCourseStudents() {
-	cout << "Two Course Menu" << endl;
-}
-void topThrees() {
-	cout << "Top Three Menu" << endl;
+void topThrees(Course courseArr[], const size_t& arrLen) {
+	for (int courseIdx = 0; courseIdx < arrLen; courseIdx++) {
+		cout << "\n[ " << courseArr[courseIdx].name << " Top Three Scores ]" << endl;
+
+		//Selection sort students descending
+		int i, j, maxIdx;
+		for (i = 0; i < courseArr[courseIdx].enrollment - 1; i++) {
+			maxIdx = i;
+			for (j = i + 1; j < courseArr[courseIdx].enrollment; j++)
+				if (courseArr[courseIdx].studArr[j].getScore() > courseArr[courseIdx].studArr[maxIdx].getScore())
+					maxIdx = j;
+			if (maxIdx != i)
+				swap(courseArr[courseIdx].studArr[maxIdx], courseArr[courseIdx].studArr[i]);
+		}
+
+		// Output top students
+		for (int studIdx = 0, place = 0; studIdx < courseArr[courseIdx].enrollment; studIdx++) { // Iterate through list of students sorted by descending scores
+			if (courseArr[courseIdx].studArr[studIdx].getScore() != courseArr[courseIdx].studArr[studIdx - 1].getScore() || studIdx == 0) { // Print header for each group of students with the same score
+				if (++place == 4) break;
+				cout << place << ". " << courseArr[courseIdx].studArr[studIdx].getScore() << endl;
+			}
+
+			cout << "   " << courseArr[courseIdx].studArr[studIdx].getId() << setw(10) << courseArr[courseIdx].studArr[studIdx].getName() << endl; // Print student data
+		}
+	}
 }
