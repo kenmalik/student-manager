@@ -2,26 +2,25 @@
 #define CS003A_STUDENT
 
 #include <string>
-using namespace std;
 
 class Student {
 private:
 	int id;
-	string name;
+	std::string name;
 	int score;
 public:
 	// Constructors
 	Student();
-	Student(int idNum, string studName, int courseScore);
+	Student(int idNum, std::string studName, int courseScore);
 
 	// Setters
 	void setId(int idNum);
-	void setName(string studName);
+	void setName(std::string studName);
 	void setScore(int courseScore);
 
 	// Getters
 	int getId();
-	string getName();
+	std::string getName();
 	int getScore();
 };
 

@@ -1,0 +1,4 @@
+/home/kenmalik/Documents/school/2022-2023/SUMMER/CS003A/Projects/student-manager/build/CMakeFiles/Main.dir
+/home/kenmalik/Documents/school/2022-2023/SUMMER/CS003A/Projects/student-manager/build/CMakeFiles/Student.dir
+/home/kenmalik/Documents/school/2022-2023/SUMMER/CS003A/Projects/student-manager/build/CMakeFiles/edit_cache.dir
+/home/kenmalik/Documents/school/2022-2023/SUMMER/CS003A/Projects/student-manager/build/CMakeFiles/rebuild_cache.dir
